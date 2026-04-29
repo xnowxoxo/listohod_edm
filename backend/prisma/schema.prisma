@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  ACCOUNTANT
+  VIEWER
+}
+
+enum DocumentStatus {
+  DRAFT
+  REVIEW
+  APPROVED
+  SIGNED
+  REJECTED
+  NEEDS_REVISION
+  ARCHIVED
+}
+
+enum DocumentType {
+  CONTRACT
+  INVOICE
+  ACT
+  SPECIFICATION
+  LETTER
+  ORDER
+  OTHER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  middleName   String?  @map("middle_name")
+  role         Role     @default(VIEWER)
+  position     String?
+  department   String?
+  isActive     Boolean  @default(true) @map("is_active")
+  avatarUrl    String?  @map("avatar_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Email verification — default true so admin-created users skip verification
+  emailVerified                   Boolean   @default(true)  @map("email_verified")
+  emailVerificationToken          String?   @unique          @map("email_verification_token")
+  emailVerificationTokenExpiresAt DateTime?                  @map("email_verification_token_expires_at")
+
+  // Password reset
+  passwordResetToken          String?   @unique @map("password_reset_token")
+  passwordResetTokenExpiresAt DateTime?          @map("password_reset_token_expires_at")
+
+  createdDocuments  Document[]       @relation("CreatedBy")
+  assignedDocuments Document[]       @relation("AssignedTo")
+  comments          Comment[]
+  activities        ActivityLog[]
+  approvals         Approval[]
+  approvalSteps     ApprovalStep[]   @relation("ApprovalStepApprover")
+  notifications     Notification[]
+
+  @@map("users")
+}
+
+model Document {
+  id          String         @id @default(cuid())
+  number      String         @unique
+  title       String
+  type        DocumentType
+  status      DocumentStatus @default(DRAFT)
+  description String?
+  amount      Decimal?       @db.Decimal(15, 2)
+  currency    String?        @default("RUB")
+  counterparty String?
+  dueDate     DateTime?      @map("due_date")
+  signedAt    DateTime?      @map("signed_at")
+  tags        String[]       @default([])
+  metadata    Json?
+
+  createdById  String   @map("created_by_id")
+  createdBy    User     @relation("CreatedBy", fields: [createdById], references: [id])
+  assignedToId String?  @map("assigned_to_id")
+  assignedTo   User?    @relation("AssignedTo", fields: [assignedToId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  attachments    Attachment[]
+  comments       Comment[]
+  activities     ActivityLog[]
+  approvals      Approval[]
+  approvalSteps  ApprovalStep[]
+  notifications  Notification[]
+
+  @@map("documents")
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  documentId   String   @map("document_id")
+  document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  originalName String   @map("original_name")
+  storedName   String   @map("stored_name")
+  mimeType     String   @map("mime_type")
+  size         Int
+  url          String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("attachments")
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  documentId String   @map("document_id")
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  authorId   String   @map("author_id")
+  author     User     @relation(fields: [authorId], references: [id])
+  text       String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("comments")
+}
+
+model Approval {
+  id         String   @id @default(cuid())
+  documentId String   @map("document_id")
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  decision   String
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("approvals")
+}
+
+model ApprovalStep {
+  id         String    @id @default(cuid())
+  documentId String    @map("document_id")
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  approverId String    @map("approver_id")
+  approver   User      @relation("ApprovalStepApprover", fields: [approverId], references: [id])
+  order      Int
+  status     String    @default("PENDING")
+  comment    String?
+  decidedAt  DateTime? @map("decided_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@map("approval_steps")
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  documentId String   @map("document_id")
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  action     String
+  details    Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("activity_logs")
+}
+
+model Notification {
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String
+  title      String
+  body       String?
+  documentId String?   @map("document_id")
+  document   Document? @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  isRead     Boolean   @default(false) @map("is_read")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@map("notifications")
+}
