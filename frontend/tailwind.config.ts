@@ -46,7 +46,11 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        'card': '0 1px 3px rgba(28, 25, 23, 0.08)',
+        'card-md': '0 4px 16px rgba(28, 25, 23, 0.10)',
       },
     },
   },

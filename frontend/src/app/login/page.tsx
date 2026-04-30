@@ -11,7 +11,6 @@ import { useAuthStore } from '@/store/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const schema = z.object({
   email: z.string().email('Некорректный email'),
@@ -43,78 +42,75 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary shadow-lg">
-            <FileText className="w-7 h-7 text-white" />
+    <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+
+        {/* Brand */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center mb-4">
+            <FileText className="w-5 h-5 text-teal-400" />
           </div>
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-white">StemAcademia</h1>
-            <p className="text-slate-400 text-sm mt-1">Система электронного документооборота</p>
-          </div>
+          <h1 className="text-xl font-bold text-stone-900 tracking-tight">StemAcademia</h1>
+          <p className="text-sm text-stone-500 mt-1">Электронный документооборот</p>
         </div>
 
-        <Card className="border-slate-700/50 bg-slate-800/50 backdrop-blur">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-white text-center">Вход в систему</CardTitle>
-            <CardDescription className="text-center text-slate-400">
-              Введите учётные данные для доступа
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-slate-300" htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="user@stemacademia.ru"
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus-visible:ring-blue-500"
-                  {...register('email')}
-                />
-                {errors.email && <p className="text-red-400 text-xs">{errors.email.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-300" htmlFor="password">Пароль</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus-visible:ring-blue-500"
-                  {...register('password')}
-                />
-                {errors.password && <p className="text-red-400 text-xs">{errors.password.message}</p>}
-              </div>
-              <div className="flex justify-end">
-                <Link href="/forgot-password" className="text-xs text-slate-400 hover:text-blue-400 transition-colors">
+        {/* Card */}
+        <div className="bg-white border border-[#e8e5e0] rounded-xl shadow-card p-7">
+          <h2 className="text-base font-semibold text-stone-900 mb-5">Вход в систему</h2>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-stone-700" htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="user@stemacademia.ru"
+                className="border-[#d6d3d1] bg-white text-stone-900 placeholder:text-stone-400 focus-visible:border-teal-500 focus-visible:ring-1 focus-visible:ring-teal-500"
+                {...register('email')}
+              />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-stone-700" htmlFor="password">Пароль</Label>
+                <Link href="/forgot-password" className="text-xs text-stone-400 hover:text-teal-600 transition-colors">
                   Забыли пароль?
                 </Link>
               </div>
-
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Войти
-              </Button>
-            </form>
-
-            <div className="mt-4 text-center">
-              <span className="text-sm text-slate-400">Нет аккаунта? </span>
-              <Link href="/register" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                Зарегистрироваться
-              </Link>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                className="border-[#d6d3d1] bg-white text-stone-900 placeholder:text-stone-400 focus-visible:border-teal-500 focus-visible:ring-1 focus-visible:ring-teal-500"
+                {...register('password')}
+              />
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-slate-700">
-              <p className="text-xs text-slate-500 text-center mb-2">Тестовые аккаунты:</p>
-              <div className="grid grid-cols-2 gap-1 text-xs text-slate-500">
-                <span>admin@stemacademia.com</span><span>admin123</span>
-                <span>manager@stemacademia.ru</span><span>user123</span>
-                <span>accountant@stemacademia.ru</span><span>user123</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <Button type="submit" className="w-full mt-1 bg-teal-600 hover:bg-teal-700" disabled={loading}>
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              Войти
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-stone-500 mt-5">
+            Нет аккаунта?{' '}
+            <Link href="/register" className="text-teal-600 hover:text-teal-700 font-medium transition-colors">
+              Зарегистрироваться
+            </Link>
+          </p>
+        </div>
+
+        {/* Test accounts */}
+        <div className="mt-5 px-1">
+          <p className="text-xs text-stone-400 text-center mb-2">Тестовые аккаунты</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-400">
+            <span className="text-stone-500 font-medium">admin@stemacademia.com</span><span>admin123</span>
+            <span className="text-stone-500 font-medium">manager@stemacademia.ru</span><span>user123</span>
+            <span className="text-stone-500 font-medium">accountant@stemacademia.ru</span><span>user123</span>
+          </div>
+        </div>
       </div>
     </div>
   );

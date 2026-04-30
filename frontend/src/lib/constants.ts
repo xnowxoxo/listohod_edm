@@ -9,13 +9,13 @@ export const DOCUMENT_STATUS_LABELS: Record<string, string> = {
 };
 
 export const DOCUMENT_STATUS_COLORS: Record<string, string> = {
-  DRAFT: 'bg-slate-50 text-slate-600 border border-slate-200',
+  DRAFT: 'bg-stone-50 text-stone-500 border border-stone-200',
   REVIEW: 'bg-amber-50 text-amber-700 border border-amber-200',
-  APPROVED: 'bg-blue-50 text-blue-700 border border-blue-200',
+  APPROVED: 'bg-teal-50 text-teal-700 border border-teal-200',
   SIGNED: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-  REJECTED: 'bg-red-50 text-red-700 border border-red-200',
+  REJECTED: 'bg-red-50 text-red-600 border border-red-200',
   NEEDS_REVISION: 'bg-orange-50 text-orange-700 border border-orange-200',
-  ARCHIVED: 'bg-gray-50 text-gray-500 border border-gray-200',
+  ARCHIVED: 'bg-stone-50 text-stone-400 border border-stone-200',
 };
 
 export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
@@ -36,10 +36,10 @@ export const ROLE_LABELS: Record<string, string> = {
 };
 
 export const ROLE_COLORS: Record<string, string> = {
-  ADMIN: 'bg-purple-50 text-purple-700 border border-purple-200',
-  MANAGER: 'bg-blue-50 text-blue-700 border border-blue-200',
-  ACCOUNTANT: 'bg-amber-50 text-amber-700 border border-amber-200',
-  VIEWER: 'bg-slate-50 text-slate-600 border border-slate-200',
+  ADMIN: 'bg-teal-50 text-teal-700 border border-teal-200',
+  MANAGER: 'bg-amber-50 text-amber-700 border border-amber-200',
+  ACCOUNTANT: 'bg-orange-50 text-orange-700 border border-orange-200',
+  VIEWER: 'bg-stone-50 text-stone-500 border border-stone-200',
 };
 
 // Generic status transitions available via PATCH /documents/:id/status.
