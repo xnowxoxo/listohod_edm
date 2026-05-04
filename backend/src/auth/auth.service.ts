@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
@@ -16,6 +16,8 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -46,12 +48,30 @@ export class AuthService {
       },
     });
 
-    await this.emailService.sendVerificationEmail(dto.email, verificationToken);
-
+    // Пытаемся отправить письмо, но не блокируем регистрацию при ошибке SMTP
     const isDev = !this.configService.get<string>('SMTP_HOST');
+    let emailSent = false;
+
+    if (!isDev) {
+      try {
+        await this.emailService.sendVerificationEmail(dto.email, verificationToken);
+        emailSent = true;
+      } catch (err: any) {
+        this.logger.error(`SMTP error for ${dto.email}: ${err?.message ?? err}`);
+        // emailSent остаётся false — вернём токен напрямую, чтобы пользователь мог подтвердить без письма
+      }
+    }
+
+    // Токен возвращается:
+    //   - в dev-режиме (SMTP не настроен)
+    //   - в production если SMTP не смог отправить письмо
+    const returnToken = isDev || !emailSent;
+
     return {
-      message: 'Регистрация прошла успешно. Проверьте email для подтверждения аккаунта.',
-      ...(isDev ? { devVerificationToken: verificationToken } : {}),
+      message: emailSent
+        ? 'Регистрация прошла успешно. Проверьте email для подтверждения аккаунта.'
+        : 'Регистрация прошла успешно. Письмо не удалось отправить — подтвердите аккаунт по ссылке ниже.',
+      ...(returnToken ? { devVerificationToken: verificationToken } : {}),
     };
   }
 

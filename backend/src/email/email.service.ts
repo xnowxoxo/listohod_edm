@@ -19,6 +19,9 @@ export class EmailService {
           user: this.configService.get<string>('SMTP_USER'),
           pass: this.configService.get<string>('SMTP_PASS'),
         },
+        connectionTimeout: 10_000,  // 10 сек на установку соединения
+        greetingTimeout: 10_000,    // 10 сек на SMTP greeting
+        socketTimeout: 20_000,      // 20 сек на операцию отправки
       });
       this.logger.log(`SMTP configured → ${host}`);
     } else {

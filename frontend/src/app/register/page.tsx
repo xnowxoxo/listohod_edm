@@ -31,6 +31,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [devToken, setDevToken] = useState<string | null>(null);
+  const [emailFailed, setEmailFailed] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -48,6 +49,10 @@ export default function RegisterPage() {
       setDone(true);
       if (res.data.devVerificationToken) {
         setDevToken(res.data.devVerificationToken);
+        // Если сообщение говорит о проблеме с письмом — помечаем
+        if (res.data.message?.includes('не удалось отправить')) {
+          setEmailFailed(true);
+        }
       }
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Ошибка регистрации';
@@ -80,7 +85,9 @@ export default function RegisterPage() {
               </div>
               {devToken && (
                 <div className="bg-amber-900/30 border border-amber-700/50 rounded-lg p-3 space-y-2">
-                  <p className="text-amber-400 text-xs font-semibold uppercase tracking-wide">Dev mode — SMTP не настроен</p>
+                  <p className="text-amber-400 text-xs font-semibold uppercase tracking-wide">
+                    {emailFailed ? 'Письмо не отправлено — подтвердите по ссылке' : 'Dev mode — SMTP не настроен'}
+                  </p>
                   <p className="text-slate-300 text-xs break-all font-mono">{devToken}</p>
                   <Button
                     size="sm"
