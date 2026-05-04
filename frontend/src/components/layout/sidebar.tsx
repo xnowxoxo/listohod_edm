@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   FileText, LayoutDashboard, Users,
-  LogOut, Archive, Bell,
+  LogOut, Archive, Bell, BookMarked,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
@@ -15,6 +15,7 @@ import { api } from '@/lib/api';
 const mainNav = [
   { href: '/dashboard', label: 'Главная', icon: LayoutDashboard },
   { href: '/documents', label: 'Документы', icon: FileText },
+  { href: '/my-documents', label: 'Мои документы', icon: BookMarked },
   { href: '/archive', label: 'Архив', icon: Archive },
 ];
 
@@ -33,14 +34,14 @@ function NavItem({
     <Link
       href={href}
       className={cn(
-        'relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all rounded-lg',
+        'relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-150 rounded-lg',
         active
           ? 'bg-white/10 text-white'
-          : 'text-stone-400 hover:text-stone-200 hover:bg-white/5',
+          : 'text-stone-400 hover:text-stone-200 hover:bg-white/8 hover:translate-x-0.5',
       )}
     >
       {active && (
-        <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-teal-400 rounded-r-full" />
+        <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-teal-400 rounded-r-full transition-all duration-200" />
       )}
       <Icon className={cn('w-4 h-4 flex-shrink-0', active ? 'text-teal-400' : 'text-stone-500')} />
       <span className="flex-1 truncate">{label}</span>
@@ -108,17 +109,23 @@ export function Sidebar() {
 
       {/* User */}
       <div className="border-t border-white/5 p-3 flex-shrink-0">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-lg mb-1">
+        <Link
+          href="/profile"
+          className={cn(
+            'flex items-center gap-3 px-2 py-2 rounded-lg mb-1 transition-colors hover:bg-white/5 group',
+            isActive('/profile') && 'bg-white/10',
+          )}
+        >
           <div className="w-8 h-8 rounded-full bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-[11px] font-bold text-teal-400 flex-shrink-0">
             {getInitials(user?.firstName, user?.lastName)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-stone-200 truncate leading-tight">{getFullName(user)}</p>
+            <p className="text-sm font-semibold text-stone-200 truncate leading-tight group-hover:text-white transition-colors">{getFullName(user)}</p>
             <p className="text-[10px] text-stone-500 truncate leading-tight">
               {user?.role ? ROLE_LABELS[user.role] : ''}
             </p>
           </div>
-        </div>
+        </Link>
         <button
           onClick={logout}
           className="flex items-center gap-3 px-3 py-2 text-sm w-full text-stone-500 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"

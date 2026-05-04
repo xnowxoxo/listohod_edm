@@ -23,7 +23,7 @@ const createSchema = z.object({
   lastName: z.string().min(1, 'Введите фамилию'),
   email: z.string().email('Некорректный email'),
   password: z.string().min(6, 'Минимум 6 символов'),
-  role: z.enum(['ADMIN', 'MANAGER', 'ACCOUNTANT', 'VIEWER']),
+  role: z.enum(['ADMIN', 'MANAGER', 'ACCOUNTANT', 'VIEWER', 'LOGISTICS']),
   position: z.string().optional(),
   department: z.string().optional(),
 });

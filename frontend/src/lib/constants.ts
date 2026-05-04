@@ -33,6 +33,7 @@ export const ROLE_LABELS: Record<string, string> = {
   MANAGER: 'Менеджер',
   ACCOUNTANT: 'Бухгалтер',
   VIEWER: 'Наблюдатель',
+  LOGISTICS: 'Логист',
 };
 
 export const ROLE_COLORS: Record<string, string> = {
@@ -40,6 +41,7 @@ export const ROLE_COLORS: Record<string, string> = {
   MANAGER: 'bg-amber-50 text-amber-700 border border-amber-200',
   ACCOUNTANT: 'bg-orange-50 text-orange-700 border border-orange-200',
   VIEWER: 'bg-stone-50 text-stone-500 border border-stone-200',
+  LOGISTICS: 'bg-blue-50 text-blue-700 border border-blue-200',
 };
 
 // Generic status transitions available via PATCH /documents/:id/status.

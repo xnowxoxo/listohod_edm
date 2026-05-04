@@ -10,3 +10,4 @@ uploads/
 __pycache__/
 *.pyc
 postgres_data/
+*.tsbuildinfo

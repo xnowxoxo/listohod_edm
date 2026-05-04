@@ -38,7 +38,7 @@ export class StampService {
     try {
       return new Date(dateStr).toLocaleString('ru-RU', {
         day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow',
+        hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty',
       });
     } catch { return dateStr; }
   }
@@ -46,7 +46,7 @@ export class StampService {
   private fmtD(dateStr: string): string {
     try {
       return new Date(dateStr).toLocaleDateString('ru-RU', {
-        day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Moscow',
+        day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Almaty',
       });
     } catch { return dateStr; }
   }
@@ -275,13 +275,15 @@ export class StampService {
     const QR_X = PAGE_W - M - QR_S;
     const QR_Y = 72;
     try {
+      const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+      const verifyUrl = `${frontendUrl}/verify/${doc.id}`;
       const qrBuf = await QRCode.toBuffer(
-        [`Номер: ${doc.number}`, `Статус: ${STATUS_LABELS[doc.status] || doc.status}`, `Дата: ${this.fmtDT(new Date().toISOString())}`].join('\n'),
+        verifyUrl,
         { width: QR_S * 3, margin: 1, errorCorrectionLevel: 'M' },
       );
       const qrImg = await pdf.embedPng(qrBuf);
       page.drawImage(qrImg, { x: QR_X, y: QR_Y, width: QR_S, height: QR_S });
-      page.drawText('Идентификатор', { x: QR_X + 8, y: QR_Y - 11, size: 7, font, color: rgb(0.55, 0.55, 0.55) });
+      page.drawText('Проверить документ', { x: QR_X - 4, y: QR_Y - 11, size: 7, font, color: rgb(0.55, 0.55, 0.55) });
     } catch (_) { /* skip */ }
 
     // ── Footer ────────────────────────────────────────────────────

@@ -35,13 +35,6 @@ const ACTION_DOT: Record<string, string> = {
   STATUS_CHANGED: 'bg-amber-400',
 };
 
-function getGreeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Доброе утро';
-  if (h < 17) return 'Добрый день';
-  return 'Добрый вечер';
-}
-
 function getToday(): string {
   return new Date().toLocaleDateString('ru-RU', {
     weekday: 'long', day: 'numeric', month: 'long',
@@ -126,7 +119,7 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-stone-900 tracking-tight">
-            {user ? `${getGreeting()}, ${user.firstName}` : 'Добро пожаловать'}
+            {user ? `Приветствую, ${user.firstName}` : 'Добро пожаловать'}
           </h1>
           <p className="text-sm text-stone-400 mt-1 capitalize">{getToday()}</p>
         </div>
@@ -144,8 +137,8 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
         {/* Всего */}
-        <Link href="/documents" className="group">
-          <div className="bg-white border border-[#e8e5e0] rounded-2xl p-5 hover:shadow-md hover:shadow-stone-100 transition-all h-full">
+        <Link href="/documents" className="group animate-fade-up" style={{ animationDelay: '0ms' }}>
+          <div className="bg-white border border-[#e8e5e0] rounded-2xl p-5 hover:shadow-lg hover:shadow-stone-100 hover:-translate-y-0.5 transition-all duration-200 h-full">
             <div className="flex items-start justify-between mb-4">
               <div className="w-10 h-10 bg-stone-100 rounded-xl flex items-center justify-center">
                 <FileText className="w-5 h-5 text-stone-500" />
@@ -158,9 +151,9 @@ export default function DashboardPage() {
         </Link>
 
         {/* На рассмотрении */}
-        <Link href="/documents?status=REVIEW" className="group">
+        <Link href="/documents?status=REVIEW" className="group animate-fade-up" style={{ animationDelay: '60ms' }}>
           <div className={cn(
-            'border rounded-2xl p-5 hover:shadow-md transition-all h-full',
+            'border rounded-2xl p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 h-full',
             reviewCount > 0
               ? 'bg-amber-50 border-amber-200 hover:shadow-amber-100'
               : 'bg-white border-[#e8e5e0] hover:shadow-stone-100',
@@ -183,8 +176,8 @@ export default function DashboardPage() {
         </Link>
 
         {/* Подписано */}
-        <Link href="/documents?status=SIGNED" className="group">
-          <div className="bg-white border border-[#e8e5e0] rounded-2xl p-5 hover:shadow-md hover:shadow-stone-100 transition-all h-full">
+        <Link href="/documents?status=SIGNED" className="group animate-fade-up" style={{ animationDelay: '120ms' }}>
+          <div className="bg-white border border-[#e8e5e0] rounded-2xl p-5 hover:shadow-lg hover:shadow-stone-100 hover:-translate-y-0.5 transition-all duration-200 h-full">
             <div className="flex items-start justify-between mb-4">
               <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', signedCount > 0 ? 'bg-emerald-100' : 'bg-stone-100')}>
                 <CheckCircle className={cn('w-5 h-5', signedCount > 0 ? 'text-emerald-600' : 'text-stone-400')} />
@@ -198,9 +191,9 @@ export default function DashboardPage() {
         </Link>
 
         {/* Отклонено */}
-        <Link href="/documents?status=REJECTED" className="group">
+        <Link href="/documents?status=REJECTED" className="group animate-fade-up" style={{ animationDelay: '180ms' }}>
           <div className={cn(
-            'border rounded-2xl p-5 hover:shadow-md transition-all h-full',
+            'border rounded-2xl p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 h-full',
             rejectedCount > 0
               ? 'bg-red-50 border-red-200 hover:shadow-red-100'
               : 'bg-white border-[#e8e5e0] hover:shadow-stone-100',
@@ -246,7 +239,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={task.id}
-                  className="bg-white border border-amber-200 rounded-2xl px-5 py-4 flex items-center gap-4 hover:shadow-md hover:shadow-amber-50 transition-all"
+                  className="bg-white border border-amber-200 rounded-2xl px-5 py-4 flex items-center gap-4 hover:shadow-md hover:shadow-amber-50 hover:border-amber-300 transition-all duration-200"
                 >
                   <div className="w-11 h-11 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Clock className="w-5 h-5 text-amber-500" />
@@ -316,7 +309,7 @@ export default function DashboardPage() {
                 <Link
                   key={doc.id}
                   href={`/documents/${doc.id}`}
-                  className="flex items-center gap-4 bg-white border border-[#e8e5e0] rounded-2xl px-5 py-4 hover:shadow-md hover:shadow-stone-100 hover:border-stone-300 transition-all group"
+                  className="flex items-center gap-4 bg-white border border-[#e8e5e0] rounded-2xl px-5 py-4 hover:shadow-md hover:shadow-stone-100 hover:border-stone-300 hover:-translate-y-px transition-all duration-200 group"
                 >
                   {/* File icon */}
                   <div className="w-10 h-10 bg-stone-50 border border-[#e8e5e0] rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-stone-100 transition-colors">

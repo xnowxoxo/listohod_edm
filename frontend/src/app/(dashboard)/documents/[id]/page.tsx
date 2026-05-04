@@ -14,7 +14,7 @@ import {
   ArrowLeft, FileText, User, Calendar, Building2,
   MessageSquare, Paperclip, Activity, Loader2,
   CheckCircle, XCircle, RotateCcw, Download,
-  Clock, AlertCircle, ChevronRight, Trash2,
+  Clock, AlertCircle, ChevronRight, Trash2, RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -31,6 +31,14 @@ const ACTION_ICONS: Record<string, React.ElementType> = {
   CREATED: FileText,
   UPDATED: RotateCcw,
   STATUS_CHANGED: Activity,
+  FILE_REPLACED: RefreshCw,
+};
+
+const ACTION_LABELS_MAP: Record<string, string> = {
+  CREATED: 'Создан',
+  UPDATED: 'Обновлён',
+  STATUS_CHANGED: 'Статус изменён',
+  FILE_REPLACED: 'Файл заменён',
 };
 
 const STEP_STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
@@ -82,6 +90,11 @@ export default function DocumentDetailPage() {
       qc.invalidateQueries({ queryKey: ['document', id] });
       qc.invalidateQueries({ queryKey: ['documents'] });
       qc.invalidateQueries({ queryKey: ['archive'] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-created'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-revision'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-archived'] });
       qc.invalidateQueries({ queryKey: ['notifications-unread-count'] });
     },
     onError: (e: any) => toast.error(e.response?.data?.message || 'Ошибка'),
@@ -91,6 +104,12 @@ export default function DocumentDetailPage() {
     mutationFn: () => api.delete(`/documents/${id}`),
     onSuccess: () => {
       toast.success('Документ удалён');
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['documents'] });
+      qc.invalidateQueries({ queryKey: ['archive'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-created'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-archived'] });
       router.push('/documents');
     },
     onError: (e: any) => toast.error(e.response?.data?.message || 'Ошибка удаления'),
@@ -105,7 +124,11 @@ export default function DocumentDetailPage() {
       setPendingDecision(null);
       qc.invalidateQueries({ queryKey: ['document', id] });
       qc.invalidateQueries({ queryKey: ['documents'] });
+      qc.invalidateQueries({ queryKey: ['archive'] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-created'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-revision'] });
       qc.invalidateQueries({ queryKey: ['notifications-unread-count'] });
     },
     onError: (e: any) => toast.error(e.response?.data?.message || 'Ошибка'),
@@ -247,12 +270,20 @@ export default function DocumentDetailPage() {
                   </p>
                   <p>{formatDateTime(doc.createdAt)}</p>
                 </div>
-                {doc.dueDate && (
-                  <div>
-                    <p className="text-muted-foreground text-xs mb-1">Срок исполнения</p>
-                    <p>{formatDate(doc.dueDate)}</p>
-                  </div>
-                )}
+                {doc.dueDate && (() => {
+                  const overdue = new Date(doc.dueDate) < new Date()
+                    && !['SIGNED', 'ARCHIVED'].includes(doc.status);
+                  return (
+                    <div>
+                      <p className="text-muted-foreground text-xs mb-1">Срок исполнения</p>
+                      <p className={`flex items-center gap-1 ${overdue ? 'text-red-600 font-medium' : ''}`}>
+                        {overdue && <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />}
+                        {formatDate(doc.dueDate)}
+                        {overdue && <span className="text-xs font-normal text-red-500">· просрочен</span>}
+                      </p>
+                    </div>
+                  );
+                })()}
                 {doc.signedAt && (
                   <div>
                     <p className="text-muted-foreground text-xs mb-1">Подписан</p>
@@ -560,6 +591,8 @@ export default function DocumentDetailPage() {
               <AttachmentsPanel
                 documentId={doc.id}
                 attachments={doc.attachments ?? []}
+                canReplace={(isAdmin || isCreator) && doc.status !== 'SIGNED'}
+                docStatus={doc.status}
               />
             </CardContent>
           </Card>
@@ -635,13 +668,25 @@ export default function DocumentDetailPage() {
             <CardContent className="space-y-3">
               {doc.activities?.map((a) => {
                 const Icon = ACTION_ICONS[a.action] || Activity;
+                const isReplace = a.action === 'FILE_REPLACED';
+                const d = a.details as Record<string, unknown> | undefined;
                 return (
                   <div key={a.id} className="flex items-start gap-2 text-sm">
-                    <Icon className="w-3.5 h-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <Icon className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${isReplace ? 'text-amber-500' : 'text-muted-foreground'}`} />
                     <div>
                       <p className="text-xs">
                         <span className="font-medium">{getFullName(a.user)}</span>
+                        {' '}
+                        <span className="text-muted-foreground">
+                          {ACTION_LABELS_MAP[a.action] ?? a.action}
+                        </span>
                       </p>
+                      {isReplace && d && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {d.oldName as string} → {d.newName as string}
+                          {d.approvalReset ? ' · согласование сброшено' : ''}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground">{formatDateTime(a.createdAt)}</p>
                     </div>
                   </div>

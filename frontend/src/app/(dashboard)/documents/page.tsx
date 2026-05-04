@@ -8,13 +8,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, FileText, ChevronLeft, ChevronRight, Archive } from 'lucide-react';
+import { Plus, Search, FileText, ChevronLeft, ChevronRight, Archive, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { formatDate, formatAmount, getFullName } from '@/lib/utils';
 import { DOCUMENT_STATUS_LABELS, DOCUMENT_STATUS_COLORS, DOCUMENT_TYPE_LABELS } from '@/lib/constants';
 import { useAuthStore } from '@/store/auth';
 import { CreateDocumentDialog } from '@/components/documents/create-document-dialog';
+
+function isOverdue(dueDate: string): boolean {
+  return new Date(dueDate) < new Date();
+}
 
 export default function DocumentsPage() {
   const router = useRouter();
@@ -26,7 +30,7 @@ export default function DocumentsPage() {
   const [page, setPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { data, isLoading, refetch } = useQuery<PaginatedResponse<Document>>({
+  const { data, isLoading } = useQuery<PaginatedResponse<Document>>({
     queryKey: ['documents', { search, status, type, page }],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -136,7 +140,7 @@ export default function DocumentsPage() {
                   {data.items.map((doc) => (
                     <tr
                       key={doc.id}
-                      className="hover:bg-muted/30 cursor-pointer transition-colors"
+                      className="hover:bg-muted/40 cursor-pointer transition-all duration-150"
                       onClick={() => router.push(`/documents/${doc.id}`)}
                     >
                       <td className="px-5 py-3">
@@ -147,6 +151,16 @@ export default function DocumentsPage() {
                             <p className="text-xs text-muted-foreground mt-0.5">
                               {doc.number} · {getFullName(doc.createdBy)}
                             </p>
+                            {doc.dueDate && (() => {
+                              const overdue = isOverdue(doc.dueDate!) && !['SIGNED', 'ARCHIVED'].includes(doc.status);
+                              return (
+                                <p className={`text-xs mt-0.5 flex items-center gap-1 ${overdue ? 'text-red-500 font-medium' : 'text-muted-foreground'}`}>
+                                  <Clock className="w-3 h-3 flex-shrink-0" />
+                                  до {formatDate(doc.dueDate!)}
+                                  {overdue && <span className="font-normal">· просрочен</span>}
+                                </p>
+                              );
+                            })()}
                           </div>
                         </div>
                       </td>
@@ -193,7 +207,7 @@ export default function DocumentsPage() {
         </CardContent>
       </Card>
 
-      <CreateDocumentDialog open={createOpen} onOpenChange={setCreateOpen} onSuccess={() => { setCreateOpen(false); refetch(); }} />
+      <CreateDocumentDialog open={createOpen} onOpenChange={setCreateOpen} onSuccess={() => setCreateOpen(false)} />
     </div>
   );
 }

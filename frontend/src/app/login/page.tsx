@@ -102,13 +102,11 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Test accounts */}
+        {/* Admin account hint */}
         <div className="mt-5 px-1">
-          <p className="text-xs text-stone-400 text-center mb-2">Тестовые аккаунты</p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-400">
+          <p className="text-xs text-stone-400 text-center mb-2">Аккаунт администратора</p>
+          <div className="grid grid-cols-2 gap-x-4 text-xs text-stone-400">
             <span className="text-stone-500 font-medium">admin@stemacademia.com</span><span>admin123</span>
-            <span className="text-stone-500 font-medium">manager@stemacademia.ru</span><span>user123</span>
-            <span className="text-stone-500 font-medium">accountant@stemacademia.ru</span><span>user123</span>
           </div>
         </div>
       </div>

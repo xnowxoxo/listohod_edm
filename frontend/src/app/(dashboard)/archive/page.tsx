@@ -41,6 +41,9 @@ export default function ArchivePage() {
       setUnarchivingId(null);
       qc.invalidateQueries({ queryKey: ['archive'] });
       qc.invalidateQueries({ queryKey: ['documents'] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-created'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-archived'] });
     },
     onError: (e: any) => {
       toast.error(e.response?.data?.message || 'Ошибка разархивирования');

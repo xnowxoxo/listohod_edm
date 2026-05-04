@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Delete, Get, Param, Res,
+  Controller, Post, Patch, Delete, Get, Param, Res, Request,
   UploadedFile, UseGuards, UseInterceptors,
   BadRequestException,
 } from '@nestjs/common';
@@ -35,6 +35,31 @@ export class AttachmentsController {
   ) {
     if (!file) throw new BadRequestException('Файл не передан');
     return this.attachmentsService.upload(documentId, file);
+  }
+
+  @Patch(':id/replace')
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Заменить файл вложения' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'Новый файл' },
+      },
+      required: ['file'],
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  replace(
+    @Param('documentId') documentId: string,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Request() req: any,
+  ) {
+    if (!file) throw new BadRequestException('Файл не передан');
+    return this.attachmentsService.replace(documentId, id, file, req.user.sub);
   }
 
   @Get(':id/download')

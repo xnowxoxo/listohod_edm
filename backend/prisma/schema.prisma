@@ -12,6 +12,7 @@ enum Role {
   MANAGER
   ACCOUNTANT
   VIEWER
+  LOGISTICS
 }
 
 enum DocumentStatus {

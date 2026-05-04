@@ -45,8 +45,9 @@ export class DocumentsService {
     search?: string;
     page?: number;
     limit?: number;
+    createdBy?: string;
   }) {
-    const { status, type, search } = query;
+    const { status, type, search, createdBy } = query;
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 20;
     const where: any = {};
@@ -57,6 +58,7 @@ export class DocumentsService {
     } else {
       where.status = { not: 'ARCHIVED' };
     }
+    if (createdBy) where.createdById = createdBy;
     if (type) where.type = type;
     if (search) {
       where.OR = [
@@ -378,6 +380,35 @@ export class DocumentsService {
     }
 
     return this.findOne(id);
+  }
+
+  async findPublicVerify(id: string) {
+    const doc = await this.prisma.document.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        number: true,
+        title: true,
+        type: true,
+        status: true,
+        counterparty: true,
+        createdAt: true,
+        signedAt: true,
+        createdBy: { select: { firstName: true, lastName: true } },
+        approvalSteps: {
+          select: {
+            order: true,
+            status: true,
+            decidedAt: true,
+            comment: true,
+            approver: { select: { firstName: true, lastName: true } },
+          },
+          orderBy: { order: 'asc' },
+        },
+      },
+    });
+    if (!doc) throw new NotFoundException('Документ не найден');
+    return doc;
   }
 
   async remove(id: string, userId: string, userRole: string) {

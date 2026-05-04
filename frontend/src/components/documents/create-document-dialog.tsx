@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { DOCUMENT_TYPE_LABELS } from '@/lib/constants';
@@ -25,6 +25,7 @@ const schema = z.object({
   counterparty: z.string().optional(),
   amount: z.string().optional(),
   assignedToId: z.string().optional(),
+  dueDate: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -36,13 +37,14 @@ interface Props {
 }
 
 export function CreateDocumentDialog({ open, onOpenChange, onSuccess }: Props) {
+  const qc = useQueryClient();
   const { data: users } = useQuery<User[]>({
     queryKey: ['users'],
     queryFn: async () => (await api.get('/users')).data,
     enabled: open,
   });
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
@@ -52,9 +54,14 @@ export function CreateDocumentDialog({ open, onOpenChange, onSuccess }: Props) {
         ...data,
         amount: data.amount ? parseFloat(data.amount) : undefined,
         assignedToId: data.assignedToId || undefined,
+        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
       }),
     onSuccess: () => {
       toast.success('Документ создан');
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['documents'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-created'] });
       reset();
       onSuccess();
     },
@@ -95,9 +102,16 @@ export function CreateDocumentDialog({ open, onOpenChange, onSuccess }: Props) {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label>Контрагент</Label>
-            <Input placeholder="МБОУ «Школа №1»" {...register('counterparty')} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Контрагент</Label>
+              <Input placeholder="МБОУ «Школа №1»" {...register('counterparty')} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Срок исполнения</Label>
+              <Input type="date" {...register('dueDate')} />
+              <p className="text-[10px] text-muted-foreground">Необязательно</p>
+            </div>
           </div>
 
           <div className="space-y-1.5">

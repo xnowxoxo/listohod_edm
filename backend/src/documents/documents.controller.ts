@@ -32,6 +32,7 @@ export class DocumentsController {
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'createdBy', required: false, description: 'Фильтр по ID создателя' })
   findAll(@Query() query: any) {
     return this.documentsService.findAll(query);
   }

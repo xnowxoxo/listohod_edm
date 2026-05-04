@@ -36,6 +36,11 @@ export function SubmitForReviewDialog({ open, onOpenChange, documentId, document
       onOpenChange(false);
       qc.invalidateQueries({ queryKey: ['document', documentId] });
       qc.invalidateQueries({ queryKey: ['documents'] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-created'] });
+      qc.invalidateQueries({ queryKey: ['my-docs-revision'] });
+      qc.invalidateQueries({ queryKey: ['notifications-unread-count'] });
     },
     onError: (e: any) => toast.error(e.response?.data?.message || 'Ошибка отправки'),
   });
