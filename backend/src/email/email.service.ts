@@ -11,7 +11,9 @@ export class EmailService {
   constructor(private configService: ConfigService) {
     const host = this.configService.get<string>('SMTP_HOST');
     if (host) {
-      this.transporter = nodemailer.createTransport({
+      // family:4 не в TS-типах nodemailer, но поддерживается runtime (net.createConnection)
+      // Без него smtp.gmail.com резолвится в IPv6, что недоступно на Render
+      const transportOptions: any = {
         host,
         port: this.configService.get<number>('SMTP_PORT') ?? 587,
         secure: (this.configService.get<number>('SMTP_PORT') ?? 587) === 465,
@@ -19,10 +21,12 @@ export class EmailService {
           user: this.configService.get<string>('SMTP_USER'),
           pass: this.configService.get<string>('SMTP_PASS'),
         },
-        connectionTimeout: 10_000,  // 10 сек на установку соединения
-        greetingTimeout: 10_000,    // 10 сек на SMTP greeting
-        socketTimeout: 20_000,      // 20 сек на операцию отправки
-      });
+        family: 4,
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 20_000,
+      };
+      this.transporter = nodemailer.createTransport(transportOptions);
       this.logger.log(`SMTP configured → ${host}`);
     } else {
       this.logger.warn('SMTP_HOST not set — running in dev mode (emails logged, not sent)');
